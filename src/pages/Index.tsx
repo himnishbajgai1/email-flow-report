@@ -1,14 +1,124 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useEffect, useState } from "react";
+import { Mail, Eye, MessageSquare, ThumbsUp, AlertTriangle, Calendar } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { MetricCard } from "@/components/MetricCard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-const Index = () => {
+interface AggregateMetrics {
+  emails_sent: number;
+  opens: number;
+  replies: number;
+  positive_replies: number;
+  bounce_rate: number;
+  meetings_booked: number;
+}
+
+interface DailyMetric {
+  date: string;
+  emails_sent: number;
+  replies: number;
+  positive_replies: number;
+  meetings_booked: number;
+}
+
+export default function Index() {
+  const { profile } = useAuth();
+  const [metrics, setMetrics] = useState<AggregateMetrics>({ emails_sent: 0, opens: 0, replies: 0, positive_replies: 0, bounce_rate: 0, meetings_booked: 0 });
+  const [dailyMetrics, setDailyMetrics] = useState<DailyMetric[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data: campaigns } = await supabase.from("campaigns").select("*");
+      if (campaigns && campaigns.length > 0) {
+        const agg = campaigns.reduce((acc, c) => ({
+          emails_sent: acc.emails_sent + c.emails_sent,
+          opens: acc.opens + c.opens,
+          replies: acc.replies + c.replies,
+          positive_replies: acc.positive_replies + c.positive_replies,
+          bounce_rate: acc.bounce_rate + Number(c.bounce_rate),
+          meetings_booked: acc.meetings_booked + c.meetings_booked,
+        }), { emails_sent: 0, opens: 0, replies: 0, positive_replies: 0, bounce_rate: 0, meetings_booked: 0 });
+        agg.bounce_rate = Number((agg.bounce_rate / campaigns.length).toFixed(1));
+        setMetrics(agg);
+      }
+
+      const { data: daily } = await supabase
+        .from("campaign_metrics")
+        .select("date, emails_sent, replies, positive_replies, meetings_booked")
+        .order("date", { ascending: true });
+      if (daily) {
+        const grouped = daily.reduce<Record<string, DailyMetric>>((acc, row) => {
+          if (!acc[row.date]) acc[row.date] = { date: row.date, emails_sent: 0, replies: 0, positive_replies: 0, meetings_booked: 0 };
+          acc[row.date].emails_sent += row.emails_sent;
+          acc[row.date].replies += row.replies;
+          acc[row.date].positive_replies += row.positive_replies;
+          acc[row.date].meetings_booked += row.meetings_booked;
+          return acc;
+        }, {});
+        setDailyMetrics(Object.values(grouped));
+      }
+    };
+    fetchData();
+  }, []);
+
+  const openRate = metrics.emails_sent > 0 ? ((metrics.opens / metrics.emails_sent) * 100).toFixed(1) + "%" : "0%";
+  const replyRate = metrics.emails_sent > 0 ? ((metrics.replies / metrics.emails_sent) * 100).toFixed(1) + "%" : "0%";
+
+  const chartConfig = { stroke: "hsl(210 100% 56%)", fill: "hsl(210 100% 56% / 0.1)" };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground mt-1">Welcome back{profile?.full_name ? `, ${profile.full_name}` : ""}</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <MetricCard title="Emails Sent" value={metrics.emails_sent.toLocaleString()} icon={Mail} color="bg-[hsl(var(--metric-blue)/0.15)] text-[hsl(var(--metric-blue))]" />
+        <MetricCard title="Open Rate" value={openRate} icon={Eye} color="bg-[hsl(var(--metric-cyan)/0.15)] text-[hsl(var(--metric-cyan))]" />
+        <MetricCard title="Reply Rate" value={replyRate} icon={MessageSquare} color="bg-[hsl(var(--metric-amber)/0.15)] text-[hsl(var(--metric-amber))]" />
+        <MetricCard title="Positive Replies" value={metrics.positive_replies.toLocaleString()} icon={ThumbsUp} color="bg-[hsl(var(--metric-green)/0.15)] text-[hsl(var(--metric-green))]" />
+        <MetricCard title="Bounce Rate" value={metrics.bounce_rate + "%"} icon={AlertTriangle} color="bg-[hsl(var(--metric-red)/0.15)] text-[hsl(var(--metric-red))]" />
+        <MetricCard title="Meetings Booked" value={metrics.meetings_booked.toLocaleString()} icon={Calendar} color="bg-[hsl(var(--metric-purple)/0.15)] text-[hsl(var(--metric-purple))]" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {[
+          { title: "Emails Sent Over Time", key: "emails_sent" as const },
+          { title: "Replies Over Time", key: "replies" as const },
+          { title: "Positive Replies Trend", key: "positive_replies" as const },
+          { title: "Meetings Booked Trend", key: "meetings_booked" as const },
+        ].map((chart) => (
+          <Card key={chart.key} className="bg-card border-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{chart.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[200px]">
+                {dailyMetrics.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={dailyMetrics}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(230 12% 18%)" />
+                      <XAxis dataKey="date" tick={{ fontSize: 11, fill: "hsl(215 15% 55%)" }} tickLine={false} axisLine={false} />
+                      <YAxis tick={{ fontSize: 11, fill: "hsl(215 15% 55%)" }} tickLine={false} axisLine={false} />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: "hsl(230 14% 11%)", border: "1px solid hsl(230 12% 18%)", borderRadius: "8px", color: "hsl(210 20% 95%)" }}
+                      />
+                      <Area type="monotone" dataKey={chart.key} stroke={chartConfig.stroke} fill={chartConfig.fill} strokeWidth={2} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                    No data yet — sync your campaigns to see trends
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );
-};
-
-export default Index;
+}

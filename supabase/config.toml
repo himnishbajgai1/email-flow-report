@@ -1,0 +1,4 @@
+project_id = "hrxzwkhxaikcjcwppnid"
+
+[functions.sync-campaigns]
+verify_jwt = false
