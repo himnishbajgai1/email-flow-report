@@ -14,16 +14,267 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      api_connections: {
+        Row: {
+          api_key: string
+          auto_sync_enabled: boolean
+          created_at: string
+          id: string
+          last_synced_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          api_key: string
+          auto_sync_enabled?: boolean
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          api_key?: string
+          auto_sync_enabled?: boolean
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_connections_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_metrics: {
+        Row: {
+          bounces: number
+          campaign_id: string
+          date: string
+          emails_sent: number
+          id: string
+          meetings_booked: number
+          opens: number
+          positive_replies: number
+          replies: number
+        }
+        Insert: {
+          bounces?: number
+          campaign_id: string
+          date: string
+          emails_sent?: number
+          id?: string
+          meetings_booked?: number
+          opens?: number
+          positive_replies?: number
+          replies?: number
+        }
+        Update: {
+          bounces?: number
+          campaign_id?: string
+          date?: string
+          emails_sent?: number
+          id?: string
+          meetings_booked?: number
+          opens?: number
+          positive_replies?: number
+          replies?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_metrics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          bounce_rate: number
+          created_at: string
+          emails_sent: number
+          id: string
+          instantly_campaign_id: string | null
+          meetings_booked: number
+          name: string
+          opens: number
+          positive_replies: number
+          replies: number
+          status: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          bounce_rate?: number
+          created_at?: string
+          emails_sent?: number
+          id?: string
+          instantly_campaign_id?: string | null
+          meetings_booked?: number
+          name: string
+          opens?: number
+          positive_replies?: number
+          replies?: number
+          status?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          bounce_rate?: number
+          created_at?: string
+          emails_sent?: number
+          id?: string
+          instantly_campaign_id?: string | null
+          meetings_booked?: number
+          name?: string
+          opens?: number
+          positive_replies?: number
+          replies?: number
+          status?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          status: string
+          workspace_id: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name?: string | null
+          status?: string
+          workspace_id: string
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      workspaces: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_workspace_id: { Args: { _user_id: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "client"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +401,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "client"],
+    },
   },
 } as const
