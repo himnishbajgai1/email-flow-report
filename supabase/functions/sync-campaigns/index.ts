@@ -30,31 +30,59 @@ serve(async (req) => {
 
     const apiKey = conn.api_key;
 
-    // Fetch campaigns from Instantly.ai
-    const campaignsRes = await fetch(
+    const instantlyHeaders = {
+      Authorization: `Bearer ${apiKey}`,
+      "x-api-key": apiKey,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+
+    const fetchInstantlyJson = async (urls: string[]): Promise<any> => {
+      let lastError = "Unknown Instantly API error";
+
+      for (const url of urls) {
+        const res = await fetch(url, { headers: instantlyHeaders });
+        if (res.ok) {
+          return await res.json();
+        }
+
+        const errText = await res.text();
+        lastError = `${res.status} - ${errText}`;
+      }
+
+      throw new Error(`Instantly API error: ${lastError}`);
+    };
+
+    // Fetch campaigns from Instantly.ai (supports both new and legacy auth/url styles)
+    const campaignsData = await fetchInstantlyJson([
+      "https://api.instantly.ai/api/v2/campaigns?limit=100",
+      "https://api.instantly.ai/api/v1/campaign/list?limit=100&skip=0",
       `https://api.instantly.ai/api/v1/campaign/list?api_key=${encodeURIComponent(apiKey)}&limit=100&skip=0`,
-    );
+    ]);
 
-    if (!campaignsRes.ok) {
-      const errText = await campaignsRes.text();
-      throw new Error(`Instantly API error: ${campaignsRes.status} - ${errText}`);
-    }
-
-    const campaignsData = await campaignsRes.json();
-    const campaigns = Array.isArray(campaignsData) ? campaignsData : [];
+    const campaigns = Array.isArray(campaignsData)
+      ? campaignsData
+      : Array.isArray(campaignsData?.items)
+        ? campaignsData.items
+        : Array.isArray(campaignsData?.data)
+          ? campaignsData.data
+          : [];
 
     for (const campaign of campaigns) {
-      const campaignId = campaign.id;
+      const campaignId = campaign.id ?? campaign.campaign_id ?? campaign._id;
+      if (!campaignId) continue;
 
-      // Fetch campaign summary/analytics
-      const summaryRes = await fetch(
-        `https://api.instantly.ai/api/v1/analytics/campaign/summary?api_key=${encodeURIComponent(apiKey)}&campaign_id=${encodeURIComponent(campaignId)}`,
-      );
-
+      // Fetch campaign summary/analytics (fallback across auth styles)
       let summary = { total_sent: 0, total_opened: 0, total_replied: 0, total_bounced: 0 };
-      if (summaryRes.ok) {
-        const summaryData = await summaryRes.json();
+      try {
+        const summaryData = await fetchInstantlyJson([
+          `https://api.instantly.ai/api/v1/analytics/campaign/summary?campaign_id=${encodeURIComponent(campaignId)}`,
+          `https://api.instantly.ai/api/v1/analytics/campaign/summary?api_key=${encodeURIComponent(apiKey)}&campaign_id=${encodeURIComponent(campaignId)}`,
+        ]);
+
         summary = summaryData ?? summary;
+      } catch {
+        // Keep defaults if campaign summary endpoint fails for a specific campaign
       }
 
       const emailsSent = summary.total_sent ?? 0;
