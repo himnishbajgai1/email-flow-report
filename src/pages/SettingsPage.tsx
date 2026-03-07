@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { RefreshCw, Key, Users, Shield } from "lucide-react";
+import { RefreshCw, Key, Shield, Users, Copy, CheckCircle2 } from "lucide-react";
 
 export default function SettingsPage() {
   const { profile, role } = useAuth();
@@ -17,6 +17,7 @@ export default function SettingsPage() {
   const [connectionId, setConnectionId] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!profile?.workspace_id) return;
@@ -62,6 +63,15 @@ export default function SettingsPage() {
     setSyncing(false);
   };
 
+  const copyWorkspaceId = () => {
+    if (profile?.workspace_id) {
+      navigator.clipboard.writeText(profile.workspace_id);
+      setCopied(true);
+      toast.success("Workspace ID copied");
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
@@ -69,32 +79,59 @@ export default function SettingsPage() {
         <p className="text-muted-foreground mt-1">Manage your API connection and preferences</p>
       </div>
 
+      {/* Workspace Info */}
+      {profile?.workspace_id && (
+        <Card className="bg-card border-border">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Workspace ID</p>
+                <p className="text-sm font-mono text-foreground/80">{profile.workspace_id}</p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={copyWorkspaceId} className="shrink-0 text-muted-foreground hover:text-foreground">
+                {copied ? <CheckCircle2 className="h-4 w-4 text-[hsl(var(--metric-green))]" /> : <Copy className="h-4 w-4" />}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* API Connection */}
       <Card className="bg-card border-border">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Key className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">API Connection</CardTitle>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <Key className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">API Connection</CardTitle>
+              <CardDescription className="text-xs">Connect your Instantly.ai account</CardDescription>
+            </div>
           </div>
-          <CardDescription>Connect your Instantly.ai account to sync campaign data</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="apiKey">API Key</Label>
-            <Input id="apiKey" type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="Enter your API key" />
+            <Label htmlFor="apiKey" className="text-sm font-medium">API Key</Label>
+            <Input id="apiKey" type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="Enter your Instantly.ai API key" className="h-11 bg-secondary/50 border-border" />
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
             <div className="space-y-0.5">
-              <Label>Auto Sync</Label>
+              <Label className="text-sm font-medium">Auto Sync</Label>
               <p className="text-xs text-muted-foreground">Automatically sync campaign data</p>
             </div>
             <Switch checked={autoSync} onCheckedChange={setAutoSync} />
           </div>
           {lastSynced && (
-            <p className="text-xs text-muted-foreground">Last synced: {new Date(lastSynced).toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+              <CheckCircle2 className="h-3 w-3 text-[hsl(var(--metric-green))]" />
+              Last synced: {new Date(lastSynced).toLocaleString()}
+            </p>
           )}
           <div className="flex gap-3">
-            <Button onClick={saveApiKey} disabled={saving}>{saving ? "Saving..." : "Save Settings"}</Button>
-            <Button variant="outline" onClick={triggerSync} disabled={syncing || !apiKey}>
+            <Button onClick={saveApiKey} disabled={saving} className="gradient-primary hover:opacity-90 font-medium">
+              {saving ? "Saving..." : "Save Settings"}
+            </Button>
+            <Button variant="outline" onClick={triggerSync} disabled={syncing || !apiKey} className="border-border hover:bg-accent">
               <RefreshCw className={`mr-2 h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
               {syncing ? "Syncing..." : "Sync Now"}
             </Button>
@@ -106,13 +143,17 @@ export default function SettingsPage() {
         <Card className="bg-card border-border">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-primary" />
-              <CardTitle className="text-lg">Admin Panel</CardTitle>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <Shield className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Admin Panel</CardTitle>
+                <CardDescription className="text-xs">Manage client accounts and workspaces</CardDescription>
+              </div>
             </div>
-            <CardDescription>Manage client accounts and view all workspaces</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="flex items-center gap-2 text-muted-foreground p-3 rounded-lg bg-secondary/30">
               <Users className="h-4 w-4" />
               <p className="text-sm">Admin management features coming soon</p>
             </div>
