@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { ArrowRight, Inbox } from "lucide-react";
 
 export default function Login() {
   const { signIn, user, loading } = useAuth();
@@ -25,31 +26,38 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md bg-card border-border">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg mb-2">C</div>
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>Sign in to your CMRR account</CardDescription>
+    <div className="flex min-h-screen items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Ambient glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+
+      <Card className="w-full max-w-md bg-card/80 backdrop-blur-xl border-border relative z-10">
+        <CardHeader className="text-center space-y-3 pb-2">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary glow-sm">
+            <Inbox className="h-7 w-7 text-primary-foreground" />
+          </div>
+          <div>
+            <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
+            <CardDescription className="mt-1">Sign in to your InboxRev account</CardDescription>
+          </div>
         </CardHeader>
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" required />
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" required className="h-11 bg-secondary/50 border-border focus:border-primary" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required className="h-11 bg-secondary/50 border-border focus:border-primary" />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-3">
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Signing in..." : "Sign In"}
+          <CardFooter className="flex flex-col gap-4 pt-2">
+            <Button type="submit" className="w-full h-11 gradient-primary hover:opacity-90 transition-opacity font-semibold" disabled={submitting}>
+              {submitting ? "Signing in..." : <>Sign In <ArrowRight className="ml-2 h-4 w-4" /></>}
             </Button>
             <div className="flex justify-between w-full text-sm">
               <Link to="/forgot-password" className="text-muted-foreground hover:text-primary transition-colors">Forgot password?</Link>
-              <Link to="/signup" className="text-primary hover:underline">Create account</Link>
+              <Link to="/signup" className="text-primary hover:text-primary/80 font-medium transition-colors">Create account</Link>
             </div>
           </CardFooter>
         </form>

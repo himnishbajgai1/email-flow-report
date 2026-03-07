@@ -1,4 +1,4 @@
-import { LayoutDashboard, Megaphone, Users, BarChart3, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Megaphone, Users, BarChart3, Settings, LogOut, Inbox } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,12 +31,12 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <div className="flex h-16 items-center gap-3 px-4 border-b border-sidebar-border">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-          C
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl gradient-primary glow-sm">
+          <Inbox className="h-5 w-5 text-primary-foreground" />
         </div>
         {!collapsed && (
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-sidebar-accent-foreground tracking-tight">CMRR</span>
+            <span className="text-sm font-bold text-sidebar-accent-foreground tracking-tight">InboxRev</span>
             <span className="text-[10px] text-sidebar-foreground">Client Portal</span>
           </div>
         )}
@@ -52,8 +52,8 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
-                      className="hover:bg-sidebar-accent/60 transition-colors"
-                      activeClassName="bg-sidebar-accent text-primary font-medium"
+                      className="hover:bg-sidebar-accent/60 transition-colors rounded-lg"
+                      activeClassName="bg-primary/10 text-primary font-medium"
                     >
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
@@ -70,7 +70,7 @@ export function AppSidebar() {
         {!collapsed && profile && (
           <p className="text-xs text-sidebar-foreground mb-2 truncate">{profile.full_name}</p>
         )}
-        <SidebarMenuButton onClick={signOut} className="hover:bg-sidebar-accent/60 text-sidebar-foreground">
+        <SidebarMenuButton onClick={signOut} className="hover:bg-sidebar-accent/60 text-sidebar-foreground rounded-lg">
           <LogOut className="mr-2 h-4 w-4" />
           {!collapsed && <span>Sign Out</span>}
         </SidebarMenuButton>

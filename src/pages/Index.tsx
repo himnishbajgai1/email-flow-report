@@ -23,6 +23,13 @@ interface DailyMetric {
   meetings_booked: number;
 }
 
+const CHART_COLORS: Record<string, { stroke: string; fill: string }> = {
+  emails_sent: { stroke: "hsl(272 72% 55%)", fill: "hsl(272 72% 55% / 0.1)" },
+  replies: { stroke: "hsl(38 92% 60%)", fill: "hsl(38 92% 60% / 0.1)" },
+  positive_replies: { stroke: "hsl(152 69% 53%)", fill: "hsl(152 69% 53% / 0.1)" },
+  meetings_booked: { stroke: "hsl(187 85% 53%)", fill: "hsl(187 85% 53% / 0.1)" },
+};
+
 export default function Index() {
   const { profile } = useAuth();
   const [metrics, setMetrics] = useState<AggregateMetrics>({ emails_sent: 0, opens: 0, replies: 0, positive_replies: 0, bounce_rate: 0, meetings_booked: 0 });
@@ -66,8 +73,6 @@ export default function Index() {
   const openRate = metrics.emails_sent > 0 ? ((metrics.opens / metrics.emails_sent) * 100).toFixed(1) + "%" : "0%";
   const replyRate = metrics.emails_sent > 0 ? ((metrics.replies / metrics.emails_sent) * 100).toFixed(1) + "%" : "0%";
 
-  const chartConfig = { stroke: "hsl(210 100% 56%)", fill: "hsl(210 100% 56% / 0.1)" };
-
   return (
     <div className="space-y-8">
       <div>
@@ -76,12 +81,12 @@ export default function Index() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <MetricCard title="Emails Sent" value={metrics.emails_sent.toLocaleString()} icon={Mail} color="bg-[hsl(var(--metric-blue)/0.15)] text-[hsl(var(--metric-blue))]" />
+        <MetricCard title="Emails Sent" value={metrics.emails_sent.toLocaleString()} icon={Mail} color="bg-[hsl(var(--metric-purple)/0.15)] text-[hsl(var(--metric-purple))]" />
         <MetricCard title="Open Rate" value={openRate} icon={Eye} color="bg-[hsl(var(--metric-cyan)/0.15)] text-[hsl(var(--metric-cyan))]" />
         <MetricCard title="Reply Rate" value={replyRate} icon={MessageSquare} color="bg-[hsl(var(--metric-amber)/0.15)] text-[hsl(var(--metric-amber))]" />
         <MetricCard title="Positive Replies" value={metrics.positive_replies.toLocaleString()} icon={ThumbsUp} color="bg-[hsl(var(--metric-green)/0.15)] text-[hsl(var(--metric-green))]" />
         <MetricCard title="Bounce Rate" value={metrics.bounce_rate + "%"} icon={AlertTriangle} color="bg-[hsl(var(--metric-red)/0.15)] text-[hsl(var(--metric-red))]" />
-        <MetricCard title="Meetings Booked" value={metrics.meetings_booked.toLocaleString()} icon={Calendar} color="bg-[hsl(var(--metric-purple)/0.15)] text-[hsl(var(--metric-purple))]" />
+        <MetricCard title="Meetings Booked" value={metrics.meetings_booked.toLocaleString()} icon={Calendar} color="bg-[hsl(var(--metric-blue)/0.15)] text-[hsl(var(--metric-blue))]" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -96,17 +101,15 @@ export default function Index() {
               <CardTitle className="text-sm font-medium text-muted-foreground">{chart.title}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[200px]">
+              <div className="h-[220px]">
                 {dailyMetrics.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={dailyMetrics}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(230 12% 18%)" />
-                      <XAxis dataKey="date" tick={{ fontSize: 11, fill: "hsl(215 15% 55%)" }} tickLine={false} axisLine={false} />
-                      <YAxis tick={{ fontSize: 11, fill: "hsl(215 15% 55%)" }} tickLine={false} axisLine={false} />
-                      <Tooltip
-                        contentStyle={{ backgroundColor: "hsl(230 14% 11%)", border: "1px solid hsl(230 12% 18%)", borderRadius: "8px", color: "hsl(210 20% 95%)" }}
-                      />
-                      <Area type="monotone" dataKey={chart.key} stroke={chartConfig.stroke} fill={chartConfig.fill} strokeWidth={2} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(260 14% 16%)" />
+                      <XAxis dataKey="date" tick={{ fontSize: 11, fill: "hsl(255 12% 50%)" }} tickLine={false} axisLine={false} />
+                      <YAxis tick={{ fontSize: 11, fill: "hsl(255 12% 50%)" }} tickLine={false} axisLine={false} />
+                      <Tooltip contentStyle={{ backgroundColor: "hsl(260 18% 10%)", border: "1px solid hsl(260 14% 16%)", borderRadius: "8px", color: "hsl(250 20% 95%)" }} />
+                      <Area type="monotone" dataKey={chart.key} stroke={CHART_COLORS[chart.key].stroke} fill={CHART_COLORS[chart.key].fill} strokeWidth={2} />
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
