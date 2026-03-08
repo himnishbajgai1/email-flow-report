@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Mail, Eye, MessageSquare, AlertTriangle } from "lucide-react";
+import { Mail, MessageSquare, AlertTriangle, Megaphone, Reply, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { MetricCard } from "@/components/MetricCard";
@@ -8,9 +8,10 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 interface AggregateMetrics {
   emails_sent: number;
-  opens: number;
   replies: number;
   bounce_rate: number;
+  total_campaigns: number;
+  active_campaigns: number;
 }
 
 interface DailyMetric {
@@ -26,7 +27,7 @@ const CHART_COLORS: Record<string, { stroke: string; fill: string }> = {
 
 export default function Index() {
   const { profile } = useAuth();
-  const [metrics, setMetrics] = useState<AggregateMetrics>({ emails_sent: 0, opens: 0, replies: 0, bounce_rate: 0 });
+  const [metrics, setMetrics] = useState<AggregateMetrics>({ emails_sent: 0, replies: 0, bounce_rate: 0, total_campaigns: 0, active_campaigns: 0 });
   const [dailyMetrics, setDailyMetrics] = useState<DailyMetric[]>([]);
 
   useEffect(() => {
@@ -35,12 +36,17 @@ export default function Index() {
       if (campaigns && campaigns.length > 0) {
         const agg = campaigns.reduce((acc, c) => ({
           emails_sent: acc.emails_sent + c.emails_sent,
-          opens: acc.opens + c.opens,
           replies: acc.replies + c.replies,
           bounce_rate: acc.bounce_rate + Number(c.bounce_rate),
-        }), { emails_sent: 0, opens: 0, replies: 0, bounce_rate: 0 });
-        agg.bounce_rate = Number((agg.bounce_rate / campaigns.length).toFixed(1));
-        setMetrics(agg);
+        }), { emails_sent: 0, replies: 0, bounce_rate: 0 });
+
+        setMetrics({
+          emails_sent: agg.emails_sent,
+          replies: agg.replies,
+          bounce_rate: Number((agg.bounce_rate / campaigns.length).toFixed(1)),
+          total_campaigns: campaigns.length,
+          active_campaigns: campaigns.filter(c => c.status === "active").length,
+        });
       }
 
       const { data: daily } = await supabase
@@ -60,7 +66,6 @@ export default function Index() {
     fetchData();
   }, []);
 
-  const openRate = metrics.emails_sent > 0 ? ((metrics.opens / metrics.emails_sent) * 100).toFixed(1) + "%" : "0%";
   const replyRate = metrics.emails_sent > 0 ? ((metrics.replies / metrics.emails_sent) * 100).toFixed(1) + "%" : "0%";
 
   return (
@@ -70,11 +75,13 @@ export default function Index() {
         <p className="text-muted-foreground mt-1">Welcome back{profile?.full_name ? `, ${profile.full_name}` : ""}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <MetricCard title="Emails Sent" value={metrics.emails_sent.toLocaleString()} icon={Mail} color="bg-[hsl(var(--metric-purple)/0.15)] text-[hsl(var(--metric-purple))]" />
-        <MetricCard title="Open Rate" value={openRate} icon={Eye} color="bg-[hsl(var(--metric-cyan)/0.15)] text-[hsl(var(--metric-cyan))]" />
+        <MetricCard title="Total Replies" value={metrics.replies.toLocaleString()} icon={Reply} color="bg-[hsl(var(--metric-green)/0.15)] text-[hsl(var(--metric-green))]" />
         <MetricCard title="Reply Rate" value={replyRate} icon={MessageSquare} color="bg-[hsl(var(--metric-amber)/0.15)] text-[hsl(var(--metric-amber))]" />
         <MetricCard title="Bounce Rate" value={metrics.bounce_rate + "%"} icon={AlertTriangle} color="bg-[hsl(var(--metric-red)/0.15)] text-[hsl(var(--metric-red))]" />
+        <MetricCard title="Active Campaigns" value={metrics.active_campaigns.toString()} icon={Activity} color="bg-[hsl(var(--metric-cyan)/0.15)] text-[hsl(var(--metric-cyan))]" />
+        <MetricCard title="Total Campaigns" value={metrics.total_campaigns.toString()} icon={Megaphone} color="bg-[hsl(var(--metric-blue)/0.15)] text-[hsl(var(--metric-blue))]" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
