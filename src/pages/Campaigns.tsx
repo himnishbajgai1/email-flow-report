@@ -40,17 +40,15 @@ export default function Campaigns() {
               <TableHead className="text-right text-xs uppercase tracking-wider font-semibold">Sent</TableHead>
               <TableHead className="text-right text-xs uppercase tracking-wider font-semibold">Opens</TableHead>
               <TableHead className="text-right text-xs uppercase tracking-wider font-semibold">Replies</TableHead>
-              <TableHead className="text-right text-xs uppercase tracking-wider font-semibold">Positive</TableHead>
               <TableHead className="text-right text-xs uppercase tracking-wider font-semibold">Bounce</TableHead>
-              <TableHead className="text-right text-xs uppercase tracking-wider font-semibold">Meetings</TableHead>
               <TableHead className="text-xs uppercase tracking-wider font-semibold">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">Loading...</TableCell></TableRow>
             ) : campaigns.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">No campaigns yet — sync your data from Settings</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">No campaigns yet — sync your data from Settings</TableCell></TableRow>
             ) : (
               campaigns.map((c) => (
                 <TableRow key={c.id} className="hover:bg-accent/30 transition-colors border-border">
@@ -58,9 +56,7 @@ export default function Campaigns() {
                   <TableCell className="text-right tabular-nums">{c.emails_sent.toLocaleString()}</TableCell>
                   <TableCell className="text-right tabular-nums">{c.opens.toLocaleString()}</TableCell>
                   <TableCell className="text-right tabular-nums">{c.replies}</TableCell>
-                  <TableCell className="text-right tabular-nums">{c.positive_replies}</TableCell>
                   <TableCell className="text-right tabular-nums">{Number(c.bounce_rate)}%</TableCell>
-                  <TableCell className="text-right tabular-nums">{c.meetings_booked}</TableCell>
                   <TableCell>
                     <Badge className={statusColors[c.status] ?? statusColors.draft}>{c.status}</Badge>
                   </TableCell>

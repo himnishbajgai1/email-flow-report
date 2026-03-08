@@ -21,15 +21,16 @@ export default function Analytics() {
     name: c.name.length > 18 ? c.name.slice(0, 18) + "…" : c.name,
     emails: c.emails_sent,
     replies: c.replies,
-    meetings: c.meetings_booked,
+    
   }));
 
+  const totalEmails = campaigns.reduce((s, c) => s + c.emails_sent, 0);
+  const totalOpens = campaigns.reduce((s, c) => s + c.opens, 0);
   const totalReplies = campaigns.reduce((s, c) => s + c.replies, 0);
-  const totalPositive = campaigns.reduce((s, c) => s + c.positive_replies, 0);
-  const totalNeutral = totalReplies - totalPositive;
   const pieData = [
-    { name: "Positive", value: totalPositive },
-    { name: "Neutral/Negative", value: totalNeutral > 0 ? totalNeutral : 0 },
+    { name: "Opened", value: totalOpens },
+    { name: "Replied", value: totalReplies },
+    { name: "No Response", value: Math.max(0, totalEmails - totalOpens) },
   ];
 
   const tooltipStyle = {
@@ -67,7 +68,7 @@ export default function Analytics() {
                     <Tooltip contentStyle={tooltipStyle} />
                     <Bar dataKey="emails" name="Emails Sent" fill="hsl(272 72% 55%)" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="replies" name="Replies" fill="hsl(38 92% 60%)" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="meetings" name="Meetings" fill="hsl(152 69% 53%)" radius={[4, 4, 0, 0]} />
+                    
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -76,7 +77,7 @@ export default function Analytics() {
 
           <Card className="bg-card border-border">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Reply Sentiment</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Email Breakdown</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[320px] flex items-center justify-center">
