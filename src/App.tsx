@@ -12,7 +12,7 @@ import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Campaigns from "./pages/Campaigns";
-import Leads from "./pages/Leads";
+
 import Analytics from "./pages/Analytics";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
@@ -44,14 +44,6 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <DashboardLayout><Campaigns /></DashboardLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leads"
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout><Leads /></DashboardLayout>
                 </ProtectedRoute>
               }
             />

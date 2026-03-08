@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Mail, Eye, MessageSquare, ThumbsUp, AlertTriangle, Calendar } from "lucide-react";
+import { Mail, Eye, MessageSquare, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { MetricCard } from "@/components/MetricCard";
@@ -10,29 +10,23 @@ interface AggregateMetrics {
   emails_sent: number;
   opens: number;
   replies: number;
-  positive_replies: number;
   bounce_rate: number;
-  meetings_booked: number;
 }
 
 interface DailyMetric {
   date: string;
   emails_sent: number;
   replies: number;
-  positive_replies: number;
-  meetings_booked: number;
 }
 
 const CHART_COLORS: Record<string, { stroke: string; fill: string }> = {
   emails_sent: { stroke: "hsl(272 72% 55%)", fill: "hsl(272 72% 55% / 0.1)" },
   replies: { stroke: "hsl(38 92% 60%)", fill: "hsl(38 92% 60% / 0.1)" },
-  positive_replies: { stroke: "hsl(152 69% 53%)", fill: "hsl(152 69% 53% / 0.1)" },
-  meetings_booked: { stroke: "hsl(187 85% 53%)", fill: "hsl(187 85% 53% / 0.1)" },
 };
 
 export default function Index() {
   const { profile } = useAuth();
-  const [metrics, setMetrics] = useState<AggregateMetrics>({ emails_sent: 0, opens: 0, replies: 0, positive_replies: 0, bounce_rate: 0, meetings_booked: 0 });
+  const [metrics, setMetrics] = useState<AggregateMetrics>({ emails_sent: 0, opens: 0, replies: 0, bounce_rate: 0 });
   const [dailyMetrics, setDailyMetrics] = useState<DailyMetric[]>([]);
 
   useEffect(() => {
@@ -43,25 +37,21 @@ export default function Index() {
           emails_sent: acc.emails_sent + c.emails_sent,
           opens: acc.opens + c.opens,
           replies: acc.replies + c.replies,
-          positive_replies: acc.positive_replies + c.positive_replies,
           bounce_rate: acc.bounce_rate + Number(c.bounce_rate),
-          meetings_booked: acc.meetings_booked + c.meetings_booked,
-        }), { emails_sent: 0, opens: 0, replies: 0, positive_replies: 0, bounce_rate: 0, meetings_booked: 0 });
+        }), { emails_sent: 0, opens: 0, replies: 0, bounce_rate: 0 });
         agg.bounce_rate = Number((agg.bounce_rate / campaigns.length).toFixed(1));
         setMetrics(agg);
       }
 
       const { data: daily } = await supabase
         .from("campaign_metrics")
-        .select("date, emails_sent, replies, positive_replies, meetings_booked")
+        .select("date, emails_sent, replies")
         .order("date", { ascending: true });
       if (daily) {
         const grouped = daily.reduce<Record<string, DailyMetric>>((acc, row) => {
-          if (!acc[row.date]) acc[row.date] = { date: row.date, emails_sent: 0, replies: 0, positive_replies: 0, meetings_booked: 0 };
+          if (!acc[row.date]) acc[row.date] = { date: row.date, emails_sent: 0, replies: 0 };
           acc[row.date].emails_sent += row.emails_sent;
           acc[row.date].replies += row.replies;
-          acc[row.date].positive_replies += row.positive_replies;
-          acc[row.date].meetings_booked += row.meetings_booked;
           return acc;
         }, {});
         setDailyMetrics(Object.values(grouped));
@@ -80,21 +70,17 @@ export default function Index() {
         <p className="text-muted-foreground mt-1">Welcome back{profile?.full_name ? `, ${profile.full_name}` : ""}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard title="Emails Sent" value={metrics.emails_sent.toLocaleString()} icon={Mail} color="bg-[hsl(var(--metric-purple)/0.15)] text-[hsl(var(--metric-purple))]" />
         <MetricCard title="Open Rate" value={openRate} icon={Eye} color="bg-[hsl(var(--metric-cyan)/0.15)] text-[hsl(var(--metric-cyan))]" />
         <MetricCard title="Reply Rate" value={replyRate} icon={MessageSquare} color="bg-[hsl(var(--metric-amber)/0.15)] text-[hsl(var(--metric-amber))]" />
-        <MetricCard title="Positive Replies" value={metrics.positive_replies.toLocaleString()} icon={ThumbsUp} color="bg-[hsl(var(--metric-green)/0.15)] text-[hsl(var(--metric-green))]" />
         <MetricCard title="Bounce Rate" value={metrics.bounce_rate + "%"} icon={AlertTriangle} color="bg-[hsl(var(--metric-red)/0.15)] text-[hsl(var(--metric-red))]" />
-        <MetricCard title="Meetings Booked" value={metrics.meetings_booked.toLocaleString()} icon={Calendar} color="bg-[hsl(var(--metric-blue)/0.15)] text-[hsl(var(--metric-blue))]" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {[
           { title: "Emails Sent Over Time", key: "emails_sent" as const },
           { title: "Replies Over Time", key: "replies" as const },
-          { title: "Positive Replies Trend", key: "positive_replies" as const },
-          { title: "Meetings Booked Trend", key: "meetings_booked" as const },
         ].map((chart) => (
           <Card key={chart.key} className="bg-card border-border">
             <CardHeader className="pb-2">
