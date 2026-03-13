@@ -1,4 +1,5 @@
-import { LayoutDashboard, Megaphone, BarChart3, Settings, LogOut, Inbox } from "lucide-react";
+import { LayoutDashboard, Megaphone, BarChart3, Settings, LogOut } from "lucide-react";
+import inboxRevLogo from "@/assets/inboxrev-logo.png";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
