@@ -98,3 +98,19 @@
     box-shadow: 0 0 40px -10px hsl(272 72% 55% / 0.3);
   }
 }
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(260 14% 20%);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(260 14% 28%);
+}
