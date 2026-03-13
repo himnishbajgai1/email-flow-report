@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft, Inbox } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import inboxRevLogo from "@/assets/inboxrev-logo.png";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -29,9 +30,7 @@ export default function ForgotPassword() {
 
       <Card className="w-full max-w-md bg-card/80 backdrop-blur-xl border-border relative z-10">
         <CardHeader className="text-center space-y-3 pb-2">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary glow-sm">
-            <Inbox className="h-7 w-7 text-primary-foreground" />
-          </div>
+          <img src={inboxRevLogo} alt="InboxRev" className="mx-auto h-14 w-14 rounded-2xl glow-sm" />
           <div>
             <CardTitle className="text-2xl font-bold tracking-tight">Reset Password</CardTitle>
             <CardDescription className="mt-1">Enter your email to receive a reset link</CardDescription>
