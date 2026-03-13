@@ -39,9 +39,7 @@ export default function Signup() {
 
       <Card className="w-full max-w-md bg-card/80 backdrop-blur-xl border-border relative z-10">
         <CardHeader className="text-center space-y-3 pb-2">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary glow-sm">
-            <Inbox className="h-7 w-7 text-primary-foreground" />
-          </div>
+          <img src={inboxRevLogo} alt="InboxRev" className="mx-auto h-14 w-14 rounded-2xl glow-sm" />
           <div>
             <CardTitle className="text-2xl font-bold tracking-tight">Create your account</CardTitle>
             <CardDescription className="mt-1">Get started with InboxRev</CardDescription>

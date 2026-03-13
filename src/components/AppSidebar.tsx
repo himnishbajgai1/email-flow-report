@@ -32,9 +32,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <div className="flex h-16 items-center gap-3 px-4 border-b border-sidebar-border">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl gradient-primary glow-sm">
-          <Inbox className="h-5 w-5 text-primary-foreground" />
-        </div>
+        <img src={inboxRevLogo} alt="InboxRev" className="h-9 w-9 shrink-0 rounded-xl" />
         {!collapsed && (
           <div className="flex flex-col">
             <span className="text-sm font-bold text-sidebar-accent-foreground tracking-tight">InboxRev</span>
