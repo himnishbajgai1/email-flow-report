@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowRight, Inbox } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import inboxRevLogo from "@/assets/inboxrev-logo.png";
 
 export default function Signup() {
   const { signUp, user, loading } = useAuth();
